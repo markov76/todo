@@ -13,20 +13,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 $input = json_decode(file_get_contents('php://input'));
-$description = filter_var($input->description,FILTER_UNSAFE_RAW);
+$id = filter_var($input->id,FILTER_SANITIZE_NUMBER_INT);
 
 
 try {
     $db = new PDO('mysql:host=localhost;dbname=todo;charcet=utf8','root', '');
     $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
     
-    $query = $db->prepare('insert into task(description) values (:description)');
-    $query->bindValue(':description',$description,PDO::PARAM_STR);
+    $query = $db->prepare('delete from task where id =(:id)');
+    $query->bindValue(':id',$id,PDO::PARAM_INT);
     $query->execute();
 
     
     header('HTTP/1.1 200 OK');
-    $data = array('id' => $db->lastInsertId(),'description' => $description);
+    $data = array('id' => $id);
     print json_encode($data);
 } catch (PDOException $pdoex) {
     header('HTTP/1.1 500 Internal Server Error');
